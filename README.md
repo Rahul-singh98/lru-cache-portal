@@ -125,3 +125,14 @@ By default, the frontend application will be available at `http://localhost:5173
 
 - **Backend Not Starting**: Ensure that no other process is using port 8080 and that all Go modules are properly installed.
 - **Frontend Not Loading**: Ensure that the backend server is running and accessible at `http://localhost:5173/`.
+
+---
+
+_Connect With me._
+
+[![Linkedin](readme_resources/icons/linkedin.png)](https://www.linkedin.com/in/rahul-singh-432555194)
+[![Mail me](readme_resources/icons/mail.png)](mailto:rahulrajput98fun@gmail.com)
+
+---
+
+_Made With :heart: by @Rahul-singh98._

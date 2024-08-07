@@ -106,8 +106,6 @@ func (c *LRUCache) Set(key string, value interface{}, expiry int64) {
 		Expiry: time.Now().Unix() + expiry,
 	})
 	c.cache[key] = newElem
-
-	return
 }
 
 // Delete removes the item with the specified key from the cache.
