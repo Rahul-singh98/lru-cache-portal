@@ -131,7 +131,7 @@ By default, the frontend application will be available at `http://localhost:5173
 _Connect With me._
 
 [![Linkedin](readme_resources/icons/linkedin.png)](https://www.linkedin.com/in/rahul-singh-432555194)
-[![Mail me](readme_resources/icons/mail.png)](mailto:rahulrajput98fun@gmail.com)
+[![Mail me](readme_resources/icons/mail.png)](mailto:rajput.rahul8510@gmail.com)
 
 ---
 
