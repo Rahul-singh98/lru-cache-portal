@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-lru-cache/internal/controllers"
+	"github.com/go-lru-cache/internal/middleware"
 )
 
 // SetupRouter initializes and configures the Gin router with the cache-related routes.
@@ -18,6 +19,9 @@ import (
 // - *gin.Engine: The configured Gin router instance.
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
+
+	// Apply the CORS handling middleware
+	router.Use(middleware.CorsMiddleware())
 
 	// Public routes
 	public := router.Group("/api")

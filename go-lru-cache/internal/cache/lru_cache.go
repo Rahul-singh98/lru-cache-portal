@@ -59,18 +59,17 @@ func (c *LRUCache) GetAll() map[string]*models.CacheEntry {
 
 	result := make(map[string]*models.CacheEntry)
 
-	for e := c.lruList.Front(); e != nil; e = e.Next() {
-		entry := e.Value.(*models.CacheEntry)
-		if !c.isExpired(e) {
-			// Locate the key associated with this element
-			for k, v := range c.cache {
-				if v == e {
-					result[k] = entry
-					break
-				}
+	for key, entry := range c.cache {
+		if !(c.isExpired(entry)) {
+			// If not expired, add to the result map
+			result[key] = &models.CacheEntry{
+				Value:  entry.Value.(*models.CacheEntry).Value,
+				Expiry: entry.Value.(*models.CacheEntry).Expiry - time.Now().Unix(),
 			}
 		}
+
 	}
+
 	return result
 }
 
@@ -83,10 +82,11 @@ func (c *LRUCache) Set(key string, value interface{}, expiry int64) {
 	defer c.mu.Unlock()
 
 	if elem, found := c.cache[key]; found {
+		fmt.Println("Found in:", found)
 		c.lruList.MoveToFront(elem)
 		elem.Value = &models.CacheEntry{
 			Value:  value,
-			Expiry: expiry,
+			Expiry: time.Now().Unix() + expiry,
 		}
 		return
 	}
@@ -100,11 +100,14 @@ func (c *LRUCache) Set(key string, value interface{}, expiry int64) {
 		}
 	}
 
+	fmt.Println("Updated the cache")
 	newElem := c.lruList.PushFront(&models.CacheEntry{
 		Value:  value,
-		Expiry: expiry,
+		Expiry: time.Now().Unix() + expiry,
 	})
 	c.cache[key] = newElem
+
+	return
 }
 
 // Delete removes the item with the specified key from the cache.

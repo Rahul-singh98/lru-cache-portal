@@ -1,32 +1,35 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-lru-cache/internal/cache"
 	"github.com/go-lru-cache/internal/models"
+	"github.com/go-lru-cache/pkg/utils"
 )
 
-var lru_cache = cache.NewLRUCache(100) // Set cache capacity as needed
+var lru_cache = cache.NewLRUCache(utils.CacheMaxCapacity) // Set cache capacity as needed
 
 // GetAll retrieves all key-value pairs from the cache and returns them as JSON.
 // Each entry in the cache is represented with its key, value, and expiration time.
-// If the cache is empty, it returns a 400 Bad Request status with an error message.
+// If the cache is empty, it returns an empty list.
 func GetAll(c *gin.Context) {
 	// Check cache
 	data := lru_cache.GetAll() // Assuming this returns map[string]interface{}
-	if data == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No Data"})
-		return
-	}
 
 	// Create a list to hold the formatted data
 	var result []map[string]interface{}
 
+	// If data is nil, return an empty list
+	if len(data) == 0 {
+		c.JSON(http.StatusOK, gin.H{"data": result})
+		return
+	}
+
 	// Iterate over the map and build the list
 	for key, value := range data {
-
 		// Append to the result list
 		result = append(result, map[string]interface{}{
 			"key":    key,
@@ -35,6 +38,7 @@ func GetAll(c *gin.Context) {
 		})
 	}
 
+	// fmt.Println("Result 2:", result)
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
@@ -44,12 +48,30 @@ func GetAll(c *gin.Context) {
 func SetCache(c *gin.Context) {
 	var requestBody models.CacheRequestBody
 
+	// Bind JSON to the request body
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format"})
+		return
+	}
+
+	// Validate request body fields
+	if requestBody.Key == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Key cannot be empty"})
+		return
+	}
+
+	if requestBody.Value == nil || requestBody.Value == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Value cannot be empty"})
+		return
+	}
+
+	if requestBody.Expiry <= utils.CacheMinTTLRequired || requestBody.Expiry >= utils.CacheMaxTTLRequired {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Expiry must be in range %d - %d", utils.CacheMinTTLRequired, utils.CacheMaxTTLRequired)})
 		return
 	}
 
 	lru_cache.Set(requestBody.Key, requestBody.Value, requestBody.Expiry)
+
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
