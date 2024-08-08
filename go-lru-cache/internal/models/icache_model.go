@@ -3,6 +3,7 @@ package models
 // CacheEntry represents a single entry in the cache.
 // It contains the value stored in the cache and the expiration time for that entry.
 type CacheEntry struct {
+	Key    string      // The key associated with the cache entry
 	Value  interface{} // The value associated with the cache entry
 	Expiry int64       // Unix timestamp indicating when the entry should expire (0 means no expiration)
 }

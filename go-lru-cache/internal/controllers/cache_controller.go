@@ -12,6 +12,28 @@ import (
 
 var lru_cache = cache.NewLRUCache(utils.CacheMaxCapacity) // Set cache capacity as needed
 
+// GetCache retrieves the cache entry associated with the specified key.
+// This endpoint returns a JSON response containing the cache entry's key, value, and expiry if the key exists.
+// If the key does not exist in the cache, it returns a 404 Not Found status with an error message.
+func GetCache(c *gin.Context) {
+	key := c.Param("key")
+
+	if entry, found := lru_cache.Get(key); found {
+		c.JSON(http.StatusOK, gin.H{
+			"data": map[string]interface{}{
+				"key":    key,
+				"value":  entry.Value,
+				"expiry": entry.Expiry,
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{
+		"error": "Unable to retrieve data for the provided key.",
+	})
+}
+
 // GetAll retrieves all key-value pairs from the cache and returns them as JSON.
 // Each entry in the cache is represented with its key, value, and expiration time.
 // If the cache is empty, it returns an empty list.

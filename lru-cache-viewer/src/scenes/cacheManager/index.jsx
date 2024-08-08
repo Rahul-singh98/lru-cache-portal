@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../shared/Modal";
 import AddData from "./AddData";
-
-import axios from "axios";
+import {
+  getCacheData,
+  getCacheDataByKey,
+  deleteCacheEntry,
+  clearCache,
+} from "../../api/cacheService";
 
 const CacheManager = () => {
   const [cacheData, setCacheData] = useState([]);
@@ -23,45 +27,37 @@ const CacheManager = () => {
 
   const fetchCacheData = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/cache");
-      console.log(response);
-      if (response.data.data !== null) {
-        setCacheData(response.data.data);
-      } else {
-        setCacheData([]);
-      }
+      const data = await getCacheData();
+      setCacheData(data.data || []);
     } catch (error) {
-      console.error("Error fetching cache data", error);
+      console.error(error.message);
     }
   };
 
   const handleDeleteCache = async (keyToDelete) => {
     try {
-      await axios.delete(`http://localhost:8080/api/cache/${keyToDelete}`);
+      await deleteCacheEntry(keyToDelete);
       fetchCacheData(); // Refresh cache data after deletion
     } catch (error) {
-      console.error("Error deleting cache entry", error);
+      console.error(error.message);
     }
   };
 
-  // const handleEditCache = async (keyToEdit, newValue, newExpiry) => {
-  //   try {
-  //     await axios.put(`http://localhost:8080/api/cache/${keyToEdit}`, {
-  //       value: newValue,
-  //       expiry: newExpiry,
-  //     });
-  //     fetchCacheData(); // Refresh cache data after editing
-  //   } catch (error) {
-  //     console.error("Error editing cache entry", error);
-  //   }
-  // };
-
   const handleClearCache = async () => {
     try {
-      await axios.delete("http://localhost:8080/api/cache");
+      await clearCache();
       fetchCacheData(); // Refresh cache data after clearing
     } catch (error) {
-      console.error("Error clearing cache", error);
+      console.error(error.message);
+    }
+  };
+
+  const handleGetCache = async (keyToDelete) => {
+    try {
+      await getCacheDataByKey(keyToDelete);
+      fetchCacheData(); // Refresh cache data after deletion
+    } catch (error) {
+      console.error(error.message);
     }
   };
 
@@ -148,19 +144,13 @@ const CacheManager = () => {
                 </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 ">
                   <div>
-                    {/* <button
-                      onClick={() =>
-                        handleEditCache(
-                          entry.key,
-                          prompt("New Value:", entry.value),
-                          prompt("New Expiry:", entry.expiry)
-                        )
-                      }
+                    <button
+                      onClick={() => handleGetCache(entry.key)}
                       type="button"
                       className="text-blue-500 active:bg-blue-600 active:text-white text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     >
-                      Edit
-                    </button> */}
+                      Refresh
+                    </button>
 
                     <button
                       onClick={() => {

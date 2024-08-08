@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { addCacheEntry } from "../../api/cacheService";
 
 const AddData = ({ onSuccess, onFailure }) => {
   const inputStyles = `mb-5 w-full rounded-lg bg-gray-200 px-5 py-3 placeholder-white`;
@@ -10,18 +10,11 @@ const AddData = ({ onSuccess, onFailure }) => {
 
   const handleCreateCache = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/cache", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          key: key,
-          value: value,
-          expiry: Number(expiry),
-        }),
+      const response = await addCacheEntry({
+        key: key,
+        value: value,
+        expiry: Number(expiry),
       });
-
       if (response.ok) {
         setKey("");
         setValue("");
@@ -33,7 +26,8 @@ const AddData = ({ onSuccess, onFailure }) => {
         setApiErrors(errorData.error);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error.message);
+      setApiErrors(error.message);
       onFailure();
     }
   };
@@ -42,11 +36,7 @@ const AddData = ({ onSuccess, onFailure }) => {
     <div className="flex items-center justify-center bg-gray-100">
       <div className="bg-gray-100 p-8 rounded w-full max-w-md">
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          {apiErrors ? (
-            <p className="mt-1 text-red-500">{apiErrors}</p>
-          ) : (
-            <></>
-          )}
+          {apiErrors ? <p className="mt-1 text-red-500">{apiErrors}</p> : <></>}
           <div>
             <label className="block mb-1" htmlFor="key">
               Key

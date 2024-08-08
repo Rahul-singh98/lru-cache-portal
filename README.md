@@ -118,13 +118,38 @@ By default, the frontend application will be available at `http://localhost:5173
 ### Backend API
 
 - **GET /api/cache**: Retrieves all key-value pairs from the cache.
+- **GET /api/cache/{key}**: Retrieve data for specific key from the cache and move it to the front of the list.
 - **POST /api/cache**: Adds a new key-value pair to the cache. Requires JSON body with `key`, `value` and `expiry`.
 - **DELETE /api/cache**: Clears all data from the cache.
+- **DELETE /api/cache/{key}**: Delete key from the cache.
 
 ## Troubleshooting
 
 - **Backend Not Starting**: Ensure that no other process is using port 8080 and that all Go modules are properly installed.
 - **Frontend Not Loading**: Ensure that the backend server is running and accessible at `http://localhost:5173/`.
+
+## Modifying Cache Settings
+
+To modify cache settings, such as increasing the cache size, edit the `pkg/utils/constants.go` file. For example, to increase the cache size, you can change:
+
+```go
+package utils
+
+// Cache constants
+const (
+	CacheMaxCapacity    = 10
+	CacheMinTTLRequired = 0
+	CacheMaxTTLRequired = 10800
+)
+```
+
+To:
+
+```go
+CacheMaxCapacity = 100 // or any other number
+```
+
+After making changes, restart the backend server for the new settings to take effect.
 
 ---
 
@@ -136,3 +161,5 @@ _Connect With me._
 ---
 
 _Made With :heart: by @Rahul-singh98._
+
+![Click to download CV](readme_resources/files/Senior_Python_Developer.pdf)

@@ -63,6 +63,7 @@ func (c *LRUCache) GetAll() map[string]*models.CacheEntry {
 		if !(c.isExpired(entry)) {
 			// If not expired, add to the result map
 			result[key] = &models.CacheEntry{
+				Key:    entry.Value.(*models.CacheEntry).Key,
 				Value:  entry.Value.(*models.CacheEntry).Value,
 				Expiry: entry.Value.(*models.CacheEntry).Expiry - time.Now().Unix(),
 			}
@@ -93,15 +94,17 @@ func (c *LRUCache) Set(key string, value interface{}, expiry int64) {
 
 	if c.lruList.Len() >= c.capacity {
 		oldest := c.lruList.Back()
+		fmt.Println("Deleting oldest:", &oldest)
 		if oldest != nil {
 			c.lruList.Remove(oldest)
-			// delete(c.cache, oldest.Value.(*models.CacheEntry).Key)
-			delete(c.cache, key)
+			delete(c.cache, oldest.Value.(*models.CacheEntry).Key)
+			// delete(c.cache, key)
 		}
 	}
 
 	fmt.Println("Updated the cache")
 	newElem := c.lruList.PushFront(&models.CacheEntry{
+		Key:    key,
 		Value:  value,
 		Expiry: time.Now().Unix() + expiry,
 	})

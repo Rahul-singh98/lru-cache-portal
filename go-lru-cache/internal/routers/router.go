@@ -26,6 +26,7 @@ func SetupRouter() *gin.Engine {
 	// Public routes
 	public := router.Group("/api")
 	{
+		public.GET("/cache/:key", controllers.GetCache)
 		public.GET("/cache", controllers.GetAll)
 		public.POST("/cache", controllers.SetCache)
 		public.DELETE("/cache/:key", controllers.DeleteCache)
