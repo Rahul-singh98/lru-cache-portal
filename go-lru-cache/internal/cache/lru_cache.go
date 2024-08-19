@@ -16,16 +16,41 @@ type LRUCache struct {
 	cache    map[string]*list.Element // Map storing keys and corresponding list elements
 	lruList  *list.List               // Doubly linked list to track the LRU order
 	mu       sync.Mutex               // Mutex for thread-safe operations
+	// Stop     chan bool                // Channel to Stop the go routine
 }
 
 // NewLRUCache creates and returns a new LRUCache with the specified capacity.
 // capacity determines the maximum number of items the cache can hold.
 func NewLRUCache(capacity int) *LRUCache {
-	return &LRUCache{
+	lru := &LRUCache{
 		capacity: capacity,
 		cache:    make(map[string]*list.Element),
 		lruList:  list.New(),
 	}
+	go lru.AutoDelete()
+	return lru
+}
+
+// Auto Delete from cache
+func (c *LRUCache) AutoDelete() {
+	// c.mu.Lock()
+	// defer c.mu.Unlock()
+
+	//  Run loop and check data
+	for {
+		for key, entry := range c.cache {
+			// check expiry
+			if c.isExpired(entry) {
+				// if key is expired then evict the data
+				fmt.Printf("Deleting the key: %s\n", key)
+				c.Delete(key)
+			}
+
+		}
+
+		// time.Sleep(time.Duration(interval) * time.Second)
+	}
+
 }
 
 // Get retrieves the value associated with the given key from the cache.
@@ -40,12 +65,12 @@ func (c *LRUCache) Get(key string) (*models.CacheEntry, bool) {
 		return nil, false
 	}
 
-	// Check if the item has expired
-	if c.isExpired(elem) {
-		c.lruList.Remove(elem)
-		delete(c.cache, key)
-		return nil, false
-	}
+	// // Check if the item has expired
+	// if c.isExpired(elem) {
+	// 	c.lruList.Remove(elem)
+	// 	// delete(c.cache, key)
+	// 	return nil, false
+	// }
 
 	c.lruList.MoveToFront(elem)
 	return elem.Value.(*models.CacheEntry), true
@@ -60,14 +85,19 @@ func (c *LRUCache) GetAll() map[string]*models.CacheEntry {
 	result := make(map[string]*models.CacheEntry)
 
 	for key, entry := range c.cache {
-		if !(c.isExpired(entry)) {
-			// If not expired, add to the result map
-			result[key] = &models.CacheEntry{
-				Key:    entry.Value.(*models.CacheEntry).Key,
-				Value:  entry.Value.(*models.CacheEntry).Value,
-				Expiry: entry.Value.(*models.CacheEntry).Expiry - time.Now().Unix(),
-			}
+		result[key] = &models.CacheEntry{
+			Key:    entry.Value.(*models.CacheEntry).Key,
+			Value:  entry.Value.(*models.CacheEntry).Value,
+			Expiry: entry.Value.(*models.CacheEntry).Expiry - time.Now().Unix(),
 		}
+		// if !(c.isExpired(entry)) {
+		// 	// If not expired, add to the result map
+		// 	result[key] = &models.CacheEntry{
+		// 		Key:    entry.Value.(*models.CacheEntry).Key,
+		// 		Value:  entry.Value.(*models.CacheEntry).Value,
+		// 		Expiry: entry.Value.(*models.CacheEntry).Expiry - time.Now().Unix(),
+		// 	}
+		// }
 
 	}
 
